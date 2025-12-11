@@ -2,6 +2,7 @@
 #include<iostream>
 #include <string>
 #include <vector>
+using namespace std;
 
 User::User(const string& n, const string& id){
     name=n;
