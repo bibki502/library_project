@@ -59,8 +59,7 @@ void User::displayProfile() const{
         }
     }
     else {
-        cout<<"You didn't borrow books"<<endl;
+        cout<<"No borrowed books"<<endl;
     }
-
     cout << "===================" <<endl;
 }

@@ -1,7 +1,3 @@
-#include "Library.h"
-#include <iostream>
-   string fileName = "test.txt";
-    Library lib(fileName);
 #include <iostream>
 #include "Library.h"
 
@@ -23,15 +19,23 @@ void showMenu() {
 }
 
 int main() {
-
-    string fileName = "data_library.txt";
+    string fileName = "../data/library_data.txt"; 
     Library lib(fileName);
     
     int choice = 0;
-    
+
     while (choice != 10) {
         showMenu();
-        cin >> choice;
+        
+        if (!(cin >> choice)) {  
+            cin.clear();  
+            cin.ignore(1000, '\n');  // очистка буффера ввода
+    
+            cout << "Please enter a NUMBER from 1 to 10." << endl;
+            continue;  
+        }
+    
+        cin.ignore();
         
         switch (choice) {
             case 1:
@@ -44,8 +48,7 @@ int main() {
                 lib.displayAllUsers();
                 break;
                 
-            case 3: 
-            {
+            case 3: {
                 cout << "\n--- ADD BOOK ---" << endl;
                 
                 string title, author, isbn;
@@ -59,7 +62,7 @@ int main() {
                 
                 cout << "Year: ";
                 cin >> year;
-                
+                cin.ignore();
                 cout << "ISBN: ";
                 getline(cin, isbn);
                 
@@ -70,8 +73,7 @@ int main() {
                 break;
             }
                 
-            case 4:
-            {
+            case 4: {
                 cout << "\n--- REGISTER NEW USER ---" << endl;
                 
                 string name, userId;
@@ -87,10 +89,8 @@ int main() {
                 
                 cout << "User registered" << endl;
                 break;
-            }
-                
-            case 5:
-            {
+            }    
+            case 5: {
                 cout << "\n--- BORROW A BOOK ---" << endl;
                 
                 string userName, isbn;
@@ -102,11 +102,9 @@ int main() {
                 getline(cin, isbn);
                 
                 lib.borrowBook(userName, isbn);
-                cout << "Book borrowed" << endl;
-            }
-                
-            case 6:
-            {
+                break;
+            }    
+            case 6: {
                 cout << "\n--- RETURN A BOOK ---" << endl;
                 
                 string isbn;
@@ -115,11 +113,9 @@ int main() {
                 getline(cin, isbn);
                 
                 lib.returnBook(isbn);
-                cout << "Book returned successfully!" << endl;
-            }
-                
-            case 7:
-            {
+                break;
+            }    
+            case 7: {
                 cout << "\n--- FIND BOOK BY ISBN ---" << endl;
                 
                 string isbn;
@@ -135,10 +131,8 @@ int main() {
                     cout << "Book not found." << endl;
                 }
                 break;
-            }
-                
-            case 8:
-            {
+            }    
+            case 8: {
                 cout << "\n--- SHOW USER PROFILE ---" << endl;
                 
                 string userName;
@@ -160,6 +154,7 @@ int main() {
                 cout << "\n--- SAVE DATA ---" << endl;
                 lib.saveToFile();
                 cout << "Data saved to file" << endl;
+                break;
                 
             case 10:
                 cout << "\nExit" << endl;

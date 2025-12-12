@@ -1,0 +1,43 @@
+BOOK
+Title: Harry Potter3
+Author: J.K. Rowling
+Year: 1997
+ISBN: 978-0-7475-3269-9
+Available: no
+BorrowedBy:  
+
+BOOK
+Title: The Great Gatsby
+Author: F. Scott Fitzgerald
+Year: 1925
+ISBN: 978-0-7432-7356-5
+Available: no
+BorrowedBy:   Smith
+
+BOOK
+Title: Alice's Jourey
+Author: Lewis Carroll
+Year: 1862
+ISBN: 978-0-6524-8989-0
+Available: yes
+BorrowedBy: 
+
+---USERS---
+USER
+Name: Smith
+UserID: USR_001
+Borrowed Books: oks: ks: 978-0-7432-7356-5
+MaxBooks: 3
+
+USER
+Name: Johnson
+UserID: USR_002
+Borrowed Books: oks: ks:
+MaxBooks: 3
+
+USER
+Name: Sasha
+UserID: USR_003
+Borrowed Books: 
+MaxBooks: 3
+

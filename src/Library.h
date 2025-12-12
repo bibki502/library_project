@@ -9,11 +9,11 @@ using namespace std;
 
 class Library{
     private:
-        vector<Book> books; //каталог книг
-        vector<User> users; //список зарегестрированных пользователей
-        string dataFile; //путь к файлу с сохранёнными данными
+        vector<Book> books;
+        vector<User> users;
+        string dataFile;
     public:
-        Library(string& datFile);
+        Library(const string& datFile);  // Исправлено на const
         void addBook(const Book& book);
         void addUser(const User& user);
         void borrowBook(const string& userName, const string& isbn);
@@ -24,7 +24,6 @@ class Library{
         void displayAllUsers();
         void saveToFile();
         void loadFromFile();
-
 };
 
 #endif

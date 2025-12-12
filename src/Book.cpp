@@ -50,12 +50,11 @@ void Book::displayInfo() const{
     cout<<"Author: "<<author<<endl;
     cout<<"Year: "<<year<<endl;
     cout<<"ISBN: "<<isbn<<endl;
-    if (isAvailable==true){
+    if (isAvailable){
         cout<<"Available"<<endl;
     }
     else{
-        cout<<"Not available: "<<endl;
+        cout<<"Not available. Borrowed by: "<<borrowedBy<<endl;
     }
-
     cout<<"-----------"<<endl;
 }

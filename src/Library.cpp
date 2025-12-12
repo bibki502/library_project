@@ -3,12 +3,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <iostream>
 using namespace std;
 
-Library::Library(string& datFile){
-    dataFile=datFile; //сохраняем путь к файлу
-    loadFromFile(); //загружаем данные из файла
+Library::Library(const string& datFile) {  // Исправлено на const string&
+    dataFile = datFile;
+    loadFromFile();
 }
 
 void Library::addBook(const Book& book){
@@ -20,12 +19,23 @@ void Library::addUser(const User& user){
 }
 
 void Library::borrowBook(const string& userName, const string& isbn){
-    Book* book=findBookByISBN(isbn); //получим указатель на book с данным isbn
-    if(book->GetIsAvailable()==false){
+    Book* book = findBookByISBN(isbn);
+    if (!book) {
+        cout << "Book not found!" << endl;
+        return;
+    }
+    
+    if(!book->GetIsAvailable()){
         cout<<"This book is borrowed"<<endl;
         return;
     }
+    
     User* user = findUserByName(userName);
+    if (!user) {
+        cout << "User not found!" << endl;
+        return;
+    }
+    
     if (user->canBorrowMore() == false) {
         cout << "User cannot borrow more books" << endl;
         return;
@@ -37,63 +47,85 @@ void Library::borrowBook(const string& userName, const string& isbn){
 }
 
 void Library::returnBook(const string& isbn){
-    Book* book = findBookByISBN(isbn); //получаем указатель на книгу с данным isbn
-    string userName = book->GetBorrowedBy(); //узнаем имя пользовтеля, который взял эту книгу
-    User* user = findUserByName(userName); //получаем указательна пользователя с таким именем
+    Book* book = findBookByISBN(isbn);
+    if (!book) {
+        cout << "Book not found!" << endl;
+        return;
+    }
+    
+    string userName = book->GetBorrowedBy();
+    User* user = findUserByName(userName);
+    
     book->returnBook();
-    cout << "Book returned successfully!" << endl;
+    if (user) {
+        user->removeBook(isbn);
+    }
+    cout << "Book returned" << endl;
 }
 
 Book* Library::findBookByISBN(const string& isbn){
     for (int i = 0; i < (int)books.size(); i++) {
         if (books[i].GetIsbn() == isbn) {
-            return &books[i]; //возвращает адрес памяти books[i]
+            return &books[i];
         }
     }
-    return 0; //если не найдётся такая книга, вернётся ничего-0
+    return nullptr;  // Лучше возвращать nullptr
 }
 
 User* Library::findUserByName(const string& name){
-    for(int i=0; i<(int)users.size(); i++){
-        if (users[i].GetName()==name){
+    for(int i = 0; i < (int)users.size(); i++){
+        if (users[i].GetName() == name){
             return &users[i];
         }
     }
-    return 0;
+    return nullptr;  // Лучше возвращать nullptr
 }
 
 void Library::displayAllBooks(){
-    for (int i=0; i<(int)books.size();i++){
+    if (books.empty()) {
+        cout << "No books in library" << endl;
+        return;
+    }
+    for (int i = 0; i < (int)books.size(); i++){
         books[i].displayInfo();
     }
 }
 
 void Library::displayAllUsers(){
-    for (int i=0; i<(int)users.size(); i++){
+    if (users.empty()) {
+        cout << "No registered users" << endl;
+        return;
+    }
+    for (int i = 0; i < (int)users.size(); i++){
         users[i].displayProfile();
     }
 }
 
 void Library::saveToFile() {
     ofstream file(dataFile);
+    if (!file.is_open()) {
+        cout << "Cannot open file for writing!" << endl;
+        return;
+    }
 
     for (int i = 0; i < (int)books.size(); i++) {
-        file<<"BOOK" << endl;
+        file << "BOOK" << endl;
         file << "Title: " << books[i].GetTitle() << endl;
         file << "Author: " << books[i].GetAuthor() << endl;
         file << "Year: " << books[i].GetYear() << endl;
         file << "ISBN: " << books[i].GetIsbn() << endl;
-        //file << "Available: " << (books[i].GetIsAvailable() ? "yes" : "no") << endl;
+        
         if (books[i].GetIsAvailable() == true) {
-             file<<"Available: yes"<<endl;
-            }
-            else {
-             file<<"Available: no"<<endl;
+            file << "Available: yes" << endl;
+        } else {
+            file << "Available: no" << endl;
         }
+        
         file << "BorrowedBy: " << books[i].GetBorrowedBy() << endl;
+        file << endl;  // Пустая строка между книгами
     }
 
-    file << "\n---USERS---" << endl;
+    file << "---USERS---" << endl;
 
     for (int i = 0; i < (int)users.size(); i++) {
         file << "USER" << endl;
@@ -101,14 +133,14 @@ void Library::saveToFile() {
         file << "UserID: " << users[i].GetUserId() << endl;
         
         vector<string> borrowed = users[i].GetborrowedBooks();
-        file << "BorrowedBooks: ";
+        file << "Borrowed Books: ";
         for (int j = 0; j < (int)borrowed.size(); j++) {
             file << borrowed[j];
             if (j != borrowed.size() - 1) file << "|";
         }
         file << endl;
         file << "MaxBooks: " << users[i].GetmaxBooksAllowed() << endl;
-        file << endl;
+        file << endl;  // Пустая строка между пользователями
     }
 
     file.close();
@@ -116,9 +148,16 @@ void Library::saveToFile() {
 
 void Library::loadFromFile() {
     ifstream file(dataFile);
+    if (!file.is_open()) {
+        cout << "File not found. Starting with empty library." << endl;
+        return;
+    }
+
+    books.clear();  // Очищаем текущие данные
+    users.clear();
 
     string line;
-    bool readingBooks = true; //флаг - сейчас читаем книги
+    bool readingBooks = true;
 
     while (getline(file, line)) {
         if (line == "---USERS---") {
@@ -126,7 +165,7 @@ void Library::loadFromFile() {
             continue;
         }
 
-        if (readingBooks==true && line == "BOOK") {//мы ещё в разделе книг
+        if (readingBooks && line == "BOOK") {
             string title, author, isbn, borrowedBy;
             int year;
             bool available;
@@ -140,7 +179,7 @@ void Library::loadFromFile() {
             getline(file, line);
             isbn = line.substr(6);
             getline(file, line);
-            available = (line.substr(10) == "yes");//если available=true, то считает yes
+            available = (line.substr(10) == "yes");
             getline(file, line);
             borrowedBy = line.substr(11);
 
@@ -149,9 +188,9 @@ void Library::loadFromFile() {
                 book.borrowBook(borrowedBy);
             }
             books.push_back(book);
-            getline(file, line); // пустая строка
+            getline(file, line); // Пропускаем пустую строку
         } 
-        else if (readingBooks==false && line == "USER") {
+        else if (!readingBooks && line == "USER") {
             string name, userId;
             int maxBooks;
             vector<string> borrowedBooks;
@@ -161,26 +200,26 @@ void Library::loadFromFile() {
             getline(file, line);
             userId = line.substr(8);
             getline(file, line);
-            string borrowedStr = line.substr(15);
+            string borrowedStr = line.substr(11);
             
+            // Разбиваем строку на ISBN
+            vector<string> pieces;
+            string currentPiece = "";
 
-            vector<string> pieces;  // Сюда сложим isbn
-            string currentPiece = "";  // Текущий isbn
-
-            for (int i = 0; i <(int)borrowedStr.size(); i++) {
-                char c = borrowedStr[i];  // Берем очередной символ
+            for (int i = 0; i < (int)borrowedStr.size(); i++) {
+                char c = borrowedStr[i];
                 
                 if (c == '|') {
                     if (!currentPiece.empty()) {
                         pieces.push_back(currentPiece);
                     }
-                    currentPiece = "";  // Начинаем новый isbn
+                    currentPiece = "";
                 } else {
                     currentPiece += c;
                 }
             }
 
-            // Последний isbn
+            // Последний ISBN
             if (!currentPiece.empty()) {
                 pieces.push_back(currentPiece);
             }
@@ -189,11 +228,12 @@ void Library::loadFromFile() {
             maxBooks = stoi(line.substr(10));
 
             User user(name, userId);
-            for (size_t i = 0; i < borrowedBooks.size(); i++) {
-                user.addBook(borrowedBooks[i]);
+            // Исправлено: используем pieces вместо borrowedBooks
+            for (size_t i = 0; i < pieces.size(); i++) {
+                user.addBook(pieces[i]);
             }
             users.push_back(user);
-            getline(file, line); // пустая строка
+            getline(file, line); // Пропускаем пустую строку
         }
     }
 
