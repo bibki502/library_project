@@ -27,7 +27,32 @@ make
 6.Запустить программу:
 ./labrary
 
-4.Примеры использования (скриншоты консоли или описание)
+4.Примеры использования:
+=== LIBRARY ===
+1. Show all books
+2. Show all users
+3. Add new book
+4. Register new user
+5. Borrow a book
+6. Return a book
+7. Search book by ISBN
+8. Show user profile
+9. Save data to file
+10. Exit
+Enter your choice (1-10): 5
+
+--- BORROW A BOOK ---
+Name: Sasha
+ISBN of book: 978-0-6524-8989-0
+This book is borrowed
+
+Book found:
+Title: Harry Potter3
+Author: J.K. Rowling
+Year: 1997
+ISBN: 978-0-7475-3269-9
+Not available. Borrowed by:
+
 
 5.Список реализованных фич:
 Просмотр всех книг в библиотеке
