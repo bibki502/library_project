@@ -1,4 +1,6 @@
 #include "Library.h"
+#include <fstream>
+#include <iostream>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -72,17 +74,128 @@ void Library::displayAllUsers(){
     }
 }
 
-// 10. СОХРАНИТЬ В ФАЙЛ
-void Library::saveToFile(){
-    // Пока просто сообщение
-    cout << "Saving data to: " << dataFile << endl;
-    cout << "(File save not implemented yet)" << endl;
+void Library::saveToFile() {
+    ofstream file(dataFile);
+
+    for (int i = 0; i < (int)books.size(); i++) {
+        file<<"BOOK" << endl;
+        file << "Title: " << books[i].GetTitle() << endl;
+        file << "Author: " << books[i].GetAuthor() << endl;
+        file << "Year: " << books[i].GetYear() << endl;
+        file << "ISBN: " << books[i].GetIsbn() << endl;
+        //file << "Available: " << (books[i].GetIsAvailable() ? "yes" : "no") << endl;
+        if (books[i].GetIsAvailable() == true) {
+             file<<"Available: yes"<<endl;
+            }
+            else {
+             file<<"Available: no"<<endl;
+        }
+        file << "BorrowedBy: " << books[i].GetBorrowedBy() << endl;
+    }
+
+    file << "\n---USERS---" << endl;
+
+    for (int i = 0; i < (int)users.size(); i++) {
+        file << "USER" << endl;
+        file << "Name: " << users[i].GetName() << endl;
+        file << "UserID: " << users[i].GetUserId() << endl;
+        
+        vector<string> borrowed = users[i].GetborrowedBooks();
+        file << "BorrowedBooks: ";
+        for (int j = 0; j < (int)borrowed.size(); j++) {
+            file << borrowed[j];
+            if (j != borrowed.size() - 1) file << "|";
+        }
+        file << endl;
+        file << "MaxBooks: " << users[i].GetmaxBooksAllowed() << endl;
+        file << endl;
+    }
+
+    file.close();
 }
 
-// 11. ЗАГРУЗИТЬ ИЗ ФАЙЛА
 void Library::loadFromFile() {
-    // Пока просто сообщение
-    cout << "Loading data from: " << dataFile << endl;
-    cout << "(File load not implemented yet)" << endl;
-    cout << "Starting with empty library." << endl;
+    ifstream file(dataFile);
+
+    string line;
+    bool readingBooks = true; //флаг - сейчас читаем книги
+
+    while (getline(file, line)) {
+        if (line == "---USERS---") {
+            readingBooks = false;
+            continue;
+        }
+
+        if (readingBooks==true && line == "BOOK") {//мы ещё в разделе книг
+            string title, author, isbn, borrowedBy;
+            int year;
+            bool available;
+
+            getline(file, line);
+            title = line.substr(7);
+            getline(file, line);
+            author = line.substr(8);
+            getline(file, line);
+            year = stoi(line.substr(6));
+            getline(file, line);
+            isbn = line.substr(6);
+            getline(file, line);
+            available = (line.substr(10) == "yes");//если available=true, то считает yes
+            getline(file, line);
+            borrowedBy = line.substr(11);
+
+            Book book(title, author, year, isbn);
+            if (!available) {
+                book.borrowBook(borrowedBy);
+            }
+            books.push_back(book);
+            getline(file, line); // пустая строка
+        } 
+        else if (readingBooks==false && line == "USER") {
+            string name, userId;
+            int maxBooks;
+            vector<string> borrowedBooks;
+
+            getline(file, line);
+            name = line.substr(6);
+            getline(file, line);
+            userId = line.substr(8);
+            getline(file, line);
+            string borrowedStr = line.substr(15);
+            
+
+            vector<string> pieces;  // Сюда сложим isbn
+            string currentPiece = "";  // Текущий isbn
+
+            for (int i = 0; i <(int)borrowedStr.size(); i++) {
+                char c = borrowedStr[i];  // Берем очередной символ
+                
+                if (c == '|') {
+                    if (!currentPiece.empty()) {
+                        pieces.push_back(currentPiece);
+                    }
+                    currentPiece = "";  // Начинаем новый isbn
+                } else {
+                    currentPiece += c;
+                }
+            }
+
+            // Последний isbn
+            if (!currentPiece.empty()) {
+                pieces.push_back(currentPiece);
+            }
+
+            getline(file, line);
+            maxBooks = stoi(line.substr(10));
+
+            User user(name, userId);
+            for (size_t i = 0; i < borrowedBooks.size(); i++) {
+                user.addBook(borrowedBooks[i]);
+            }
+            users.push_back(user);
+            getline(file, line); // пустая строка
+        }
+    }
+
+    file.close();
 }
